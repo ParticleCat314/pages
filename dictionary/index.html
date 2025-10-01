@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Cosmic Dictionary</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e8e8e8;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Subtle starfield background */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .star {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: subtleTwinkle 4s infinite ease-in-out;
+        }
+        
+        .star:nth-child(odd) {
+            animation-duration: 3s;
+        }
+        
+        .star:nth-child(3n) {
+            animation-duration: 5s;
+        }
+        
+        @keyframes subtleTwinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+        
+        /* Minimal floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            animation: gentleFloat 20s infinite linear;
+        }
+        
+        @keyframes gentleFloat {
+            0% { transform: translateY(100vh) translateX(0px); opacity: 0; }
+            10% { opacity: 0.3; }
+            90% { opacity: 0.3; }
+            100% { transform: translateY(-100px) translateX(50px); opacity: 0; }
+        }
+        
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 2.8em;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #ffffff;
+            letter-spacing: -0.02em;
+        }
+        
+        .search-container {
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        #searchInput {
+            width: 100%;
+            max-width: 500px;
+            padding: 15px 20px;
+            font-size: 1.1em;
+            font-family: 'Inter', sans-serif;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            color: #e8e8e8;
+            outline: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        #searchInput::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        #searchInput:focus {
+            border-color: rgba(100, 181, 246, 0.5);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 20px rgba(100, 181, 246, 0.2);
+        }
+        
+        .search-status {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #90caf9;
+            min-height: 20px;
+            opacity: 0.8;
+        }
+        
+        .button-group {
+            margin-bottom: 30px;
+        }
+        
+        .word {
+            font-size: 2.2em;
+            font-weight: 600;
+            margin: 25px 0;
+            color: #64b5f6;
+            letter-spacing: -0.01em;
+        }
+        
+        .definition {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            white-space: pre-line;
+            transition: all 0.2s ease;
+        }
+        
+        .definition:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        button {
+            font-family: 'Inter', sans-serif;
+            font-size: 1em;
+            font-weight: 500;
+            padding: 12px 24px;
+            margin: 8px;
+            background: rgba(100, 181, 246, 0.15);
+            color: #64b5f6;
+            border: 1px solid rgba(100, 181, 246, 0.3);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        button:hover {
+            background: rgba(100, 181, 246, 0.25);
+            border-color: rgba(100, 181, 246, 0.5);
+            transform: translateY(-1px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .loading {
+            color: #64b5f6;
+            font-style: italic;
+            font-size: 1.1em;
+            opacity: 0.8;
+        }
+        
+        .error {
+            color: #ff8a80;
+            background: rgba(255, 138, 128, 0.1);
+            border: 1px solid rgba(255, 138, 128, 0.2);
+            padding: 15px;
+            border-radius: 6px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .word-entry {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.2s ease;
+        }
+        
+        .word-entry:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+        
+        /* Search result specific styles */
+        .search-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 0.85em;
+            opacity: 0.7;
+        }
+        
+        .match-type {
+            color: #64b5f6;
+            font-weight: 500;
+        }
+        
+        .relevance-score {
+            font-family: monospace;
+            font-size: 0.8em;
+            color: #90caf9;
+            cursor: help;
+        }
+        
+        mark {
+            background: rgba(100, 181, 246, 0.3);
+            color: #64b5f6;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+        
+        .load-more-container {
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        .load-more-btn {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95em;
+            font-weight: 500;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #90caf9;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .load-more-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-1px);
+        }
+        
+        /* Keep original displayMultipleWords styles for non-search results */
+        .word-entry.random {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.2s ease;
+        }
+        
+        .word-entry.random:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+        
+        /* Disclaimer styling */
+        .disclaimer {
+            margin-top: 40px;
+            padding: 15px 20px;
+            font-size: 0.85em;
+            line-height: 1.4;
+            color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            text-align: left;
+            backdrop-filter: blur(5px);
+        }
+        
+        .disclaimer-title {
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 8px;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.2em;
+            }
+            
+            .word {
+                font-size: 1.8em;
+            }
+            
+            .definition {
+                font-size: 1em;
+                padding: 16px;
+            }
+            
+            button {
+                font-size: 0.9em;
+                padding: 10px 20px;
+            }
+            
+            .container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Animated starfield background -->
+    <div class="stars" id="stars"></div>
+    
+    <!-- Floating particles -->
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <h1>Cosmic Dictionary</h1>
+        
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search words or definitions..." autocomplete="off">
+            <div class="search-status" id="searchStatus"></div>
+        </div>
+        
+        <div class="button-group">
+            <button onclick="getRandomWord()">Get Random Word</button>
+            <button onclick="getMultipleWords(5)">Get 5 Random Words</button>
+            <button onclick="clearSearch()">Clear Search</button>
+        </div>
+        
+        <div id="loading" class="loading" style="display: none;">Loading...</div>
+        <div id="error" class="error" style="display: none;"></div>
+        
+        <div id="wordDisplay"></div>
+        
+        <div class="disclaimer">
+            <div class="disclaimer-title">About the Definitions</div>
+            <div>
+                Definitions are sourced from open datasets and may contain historical biases, outdated terminology, or incomplete information. Content is provided as-is for educational exploration.
+                See <a href="https://github.com/wordset/wordset-dictionary" target="_blank">Source</a> for some of the data.
+            </div>
+        </div>
+    </div>
+    
+    <script src="main.js"></script>
+</body>
+
